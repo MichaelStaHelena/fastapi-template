@@ -4,9 +4,9 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    app_name: str = "Project Management API"
-    database_url: str = "sqlite:///./sql_app.db"
-    api_v1_prefix: str = "/api/v1"
+    app_name: str = ""
+    database_url: str = ""
+    api_v1_prefix: str = ""
 
     class Config:
         env_file = ".env"

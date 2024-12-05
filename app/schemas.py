@@ -1,61 +1,51 @@
-from typing import Any
-from typing import Optional, List
 from datetime import datetime
+from enum import Enum
+from typing import Optional, List, Any
+
 from pydantic import BaseModel, Field
 
 
-# Base Schemas (Shared attributes)
-class JutsuBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
-    type: str = Field(..., min_length=1, max_length=50)
-    chakra_cost: int = Field(..., ge=1, description="Chakra cost of the jutsu")
+class TaskStatus(str, Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
 
 
-class CharacterBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
-    village: str = Field(..., min_length=1, max_length=50)
-    rank: Optional[str] = Field(None, max_length=50)
+class TaskPriority(int, Enum):
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
 
 
-# Request Schemas (For creating or updating)
-class JutsuCreate(JutsuBase):
+# Base Schemas
+class TaskBase(BaseModel):
+    title: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=1000)
+    due_date: Optional[datetime] = None
+    status: TaskStatus = Field(default=TaskStatus.PENDING)
+    priority: TaskPriority = Field(default=TaskPriority.MEDIUM)
+
+
+class TaskCreate(TaskBase):
     pass
 
 
-class JutsuUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
-    type: Optional[str] = Field(None, min_length=1, max_length=50)
-    chakra_cost: Optional[int] = Field(None, ge=1)
+class TaskUpdate(BaseModel):
+    title: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = None
+    due_date: Optional[datetime] = None
+    status: Optional[TaskStatus] = None
+    priority: Optional[TaskPriority] = None
 
 
-class CharacterCreate(CharacterBase):
-    pass
-
-
-class CharacterUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
-    village: Optional[str] = Field(None, min_length=1, max_length=50)
-    rank: Optional[str] = Field(None, max_length=50)
-
-
-# Response Schemas (For returning data)
-class JutsuRead(JutsuBase):
+# Response Schemas
+class TaskRead(TaskBase):
     id: int
     created_at: datetime
-    updated_at: datetime
 
     class Config:
-        orm_mode = True
-
-
-class CharacterRead(CharacterBase):
-    id: int
-    created_at: datetime
-    updated_at: datetime
-    jutsus: List[JutsuRead] = []
-
-    class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Pagination Schemas

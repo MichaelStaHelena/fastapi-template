@@ -1,7 +1,5 @@
 import logging
-import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError, HTTPException
@@ -12,8 +10,7 @@ from sqlmodel import SQLModel
 
 from app.config import get_settings
 from app.database import engine
-from app.logging_config import setup_logging
-from app.routers.api import character_router, jutsu_router
+from app.routers.api import task_router
 from app.routers.health import router as health_router
 
 settings = get_settings()
@@ -22,7 +19,7 @@ settings = get_settings()
 # Lifespan event handler
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    setup_logging()
+    logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     logger.info("Starting application...")
 
@@ -125,11 +122,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
 
 # Include routers
 app.include_router(
-    character_router,
-    prefix=settings.api_v1_prefix
-)
-app.include_router(
-    jutsu_router,
+    task_router,
     prefix=settings.api_v1_prefix
 )
 app.include_router(health_router)
